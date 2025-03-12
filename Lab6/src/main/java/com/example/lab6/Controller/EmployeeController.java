@@ -82,8 +82,8 @@ public class EmployeeController {
         return searchByPosition;
 
     }
-     @GetMapping("/getByAge/{age}")
-    public ResponseEntity getEmployeeByAge(@PathVariable int age,Errors errors ){
+     @GetMapping("/getByAge")
+    public ResponseEntity getEmployeeByAge(@RequestParam int min,@RequestParam int max,Errors errors ){
         if(errors.hasErrors()){
             String message = errors.getFieldError().getDefaultMessage();
             return ResponseEntity.status(400).body(message);
@@ -91,7 +91,7 @@ public class EmployeeController {
 
         ArrayList<Employee> employees1 = new ArrayList<>();
         for(Employee e: employees){
-            if(e.getAge()==age){
+            if(e.getAge()>= min && e.getAge()<= max){
                 employees1.add(e);
             }
         }
@@ -132,9 +132,37 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse("Employee not found"));
     }
 
-//    public ResponseEntity promoteEmployee(){
-//
-//    }
+    @PutMapping("/promote/{id}")
+    public ResponseEntity promoteEmployee(@PathVariable String id){
+
+        Employee employeeID =null;
+        for(Employee e: employees){
+            if(e.getId().equals(id)&& e.getPosition().equals("supervisor")){
+                employeeID =e;
+                break;
+            }
+        }
+        if (employeeID == null){
+            return ResponseEntity.status(400).body(new ApiResponse("you do not have permission!! only supervisor"));
+        }
+
+        Employee employeePromote = null;
+        for(Employee e: employees){
+            if(e.getId().equals(id)){
+                employeePromote=e;
+            }
+        }
+        if(employeePromote == null){
+            return ResponseEntity.status(400).body(new ApiResponse("No employee found with this ID"));
+        }
+
+        if(employeePromote.getAge()> 30 || employeePromote.isOnLeave()){
+            return ResponseEntity.status(400).body(new ApiResponse("Employee does not match the criteria "));
+        }
+        employeePromote.setPosition("supervisor");
+        return ResponseEntity.status(200).body(new ApiResponse("Employee promoted successfully"));
+
+    }
 
 
 

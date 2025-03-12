@@ -19,6 +19,7 @@ public class Employee {
 
     @NotEmpty(message = "The name must not be empty")
     @Size(min = 5, message = "The name must be more than 4 character")
+    @Pattern(regexp = "^[a-zA-Z]+$",message = "Name only in letter")
     private String name;
 
     @Email
